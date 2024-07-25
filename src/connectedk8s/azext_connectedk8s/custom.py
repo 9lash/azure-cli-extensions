@@ -483,7 +483,7 @@ def create_connectedk8s(cmd, client, resource_group_name, cluster_name, correlat
     put_cc_response = create_cc_resource(client, resource_group_name, cluster_name, cc, no_wait)
     put_cc_response = LongRunningOperation(cmd.cli_ctx)(put_cc_response)
     print("Azure resource provisioning has finished.")
-    dp_request_payload = put_cc_response.result()
+    dp_request_payload = put_cc_response
 
     # Checking if custom locations rp is registered and fetching oid if it is registered
     enable_custom_locations, custom_locations_oid = check_cl_registration_and_get_oid(cmd, cl_oid, subscription_id)
@@ -916,6 +916,13 @@ def set_security_profile(enable_workload_identity):
 
 def generate_arc_agent_configuration(configuration_settings, configuration_protected_settings):
     arc_agentry_configurations = []
+
+    # Initialize configuration_settings and configuration_protected_settings if they are None
+    if configuration_settings is None:
+        configuration_settings = {}
+    if configuration_protected_settings is None:
+        configuration_protected_settings = {}
+
     for feature in set(list(configuration_settings.keys()) + list(configuration_protected_settings.keys())):
         settings = configuration_settings.get(feature)
         protected_settings = configuration_protected_settings.get(feature)
@@ -2889,6 +2896,11 @@ def check_operation_support(operation_name, agent_version):
 
 def add_config_protected_settings(https_proxy, http_proxy, no_proxy, proxy_cert, container_log_path, configuration_settings, configuration_protected_settings):
     protected_helm_values = {}
+
+    # Initialize configuration_protected_settings if it is None
+    if configuration_protected_settings is None:
+        configuration_protected_settings = {}
+
     if container_log_path:
         configuration_settings.setdefault("logging", {"container_log_path": container_log_path})
     if any([https_proxy, http_proxy, no_proxy, proxy_cert]):
